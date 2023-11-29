@@ -14,7 +14,7 @@ func NewSystemCommand() []*command.Command {
 		{
 			Name:        "quit",
 			Description: "退出",
-			Func: func(cmd *command.ExecCmd) {
+			Run: func(cmd *command.ExecCmd) {
 				fmt.Println("Bye!")
 				os.Exit(0)
 			},
@@ -22,7 +22,7 @@ func NewSystemCommand() []*command.Command {
 		{
 			Name:        "exit",
 			Description: "退出",
-			Func: func(cmd *command.ExecCmd) {
+			Run: func(cmd *command.ExecCmd) {
 				fmt.Println("Bye!")
 				os.Exit(0)
 			},
@@ -30,14 +30,14 @@ func NewSystemCommand() []*command.Command {
 		{
 			Name:        "clear",
 			Description: "清空屏幕",
-			Func: func(cmd *command.ExecCmd) {
+			Run: func(cmd *command.ExecCmd) {
 				_ = clearScreen()
 			},
 		},
 		{
 			Name:        "context",
 			Description: "显示当前会话的配置",
-			Func: func(cmd *command.ExecCmd) {
+			Run: func(cmd *command.ExecCmd) {
 				ctx.ShowCtxInfo()
 			},
 		},

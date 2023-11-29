@@ -15,9 +15,6 @@ func NewUseCommand() *command.Command {
 	return &command.Command{
 		Name:        "use",
 		Description: "使用该命令切换集群或Namespace",
-		Func: func(cmd *command.ExecCmd) {
-			cmd.Command.Help()
-		},
 		Commands: []*command.Command{
 			{
 				Name:        "cluster",
@@ -26,7 +23,7 @@ func NewUseCommand() *command.Command {
 					Func:        listKubeconfig,
 					Description: "kubeconfig文件路径",
 				},
-				Func: func(cmd *command.ExecCmd) {
+				Run: func(cmd *command.ExecCmd) {
 					if cmd.Child == nil {
 						cmd.Command.Help()
 						return
@@ -48,7 +45,7 @@ func NewUseCommand() *command.Command {
 					},
 					Description: "namespace的名称",
 				},
-				Func: func(cmd *command.ExecCmd) {
+				Run: func(cmd *command.ExecCmd) {
 					if cmd.Child == nil && len(cmd.Params) == 0 {
 						cmd.Command.Help()
 						return

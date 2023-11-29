@@ -41,7 +41,7 @@ type Command struct {
 	Commands       []*Command
 	Args           []*Param
 	DynamicCommand *DynamicCommand
-	Func           func(cmd *ExecCmd)
+	Run            func(cmd *ExecCmd)
 }
 
 func (cl *Command) AddCommand(cmds ...*Command) {
@@ -82,11 +82,12 @@ func (cl *Command) Check() error {
 	if cl.Description == "" {
 		return errors.New("command description required")
 	}
-	if cl.Func == nil {
+	if cl.Run == nil {
 		if len(cl.Commands) == 0 {
 			return errors.New("command func required")
 		}
-		cl.Func = func(cmd *ExecCmd) {
+		// 如果还有子命令，则当前命令的Run默认为help命令
+		cl.Run = func(cmd *ExecCmd) {
 			cmd.Command.Help()
 		}
 	}

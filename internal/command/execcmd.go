@@ -20,12 +20,12 @@ type ExecCmd struct {
 
 func (ec *ExecCmd) Exec() {
 	if ec.Command != nil {
-		if ec.Command.Func == nil {
+		if ec.Command.Run == nil {
 			// 使用默认的kubectl执行
 			ec.execKubectl()
 			return
 		}
-		ec.Command.Func(ec)
+		ec.Command.Run(ec)
 		return
 	}
 	if ec.Parent != nil {
