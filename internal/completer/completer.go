@@ -13,11 +13,26 @@ type Completer struct {
 func NewCompleter() *Completer {
 	commands := NewSystemCommand()
 	commands = append(commands, NewUseCommand())
-	return &Completer{
+	c := &Completer{
 		cmd: &command.Command{
 			Commands: commands,
 		},
 	}
+	for _, cmd := range c.cmd.Commands {
+		if err := cmd.Check(); err != nil {
+			panic(err)
+		}
+	}
+	return c
+}
+
+func (c *Completer) Registry(cmd ...*command.Command) {
+	for _, tcmd := range cmd {
+		if err := tcmd.Check(); err != nil {
+			panic(err)
+		}
+	}
+	c.cmd.Commands = append(c.cmd.Commands, cmd...)
 }
 
 func (c *Completer) Exec(cmd string) {
