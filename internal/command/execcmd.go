@@ -1,10 +1,6 @@
 package command
 
 import (
-	"fmt"
-	"github.com/cxweilai/kubectlx/internal/ctx"
-	"os"
-	"os/exec"
 	"strings"
 )
 
@@ -18,31 +14,16 @@ type ExecCmd struct {
 	Input   string
 }
 
-func (ec *ExecCmd) Exec() {
+func (ec *ExecCmd) Exec() bool {
 	if ec.Command != nil {
-		if ec.Command.Run == nil {
-			// 使用默认的kubectl执行
-			ec.execKubectl()
-			return
-		}
 		ec.Command.Run(ec)
-		return
+		return true
 	}
 	if ec.Parent != nil {
 		// 交给父命令执行
-		ec.Parent.Exec()
+		return ec.Parent.Exec()
 	}
-}
-
-func (ec *ExecCmd) execKubectl() {
-	exec.Command("/bin/sh", "-c", "export KUBECONFIG=", ctx.GetKubeconfig())
-	c := exec.Command("/bin/sh", "-c", "kubectl "+ec.Input)
-	c.Stdin = os.Stdin
-	c.Stdout = os.Stdout
-	c.Stderr = os.Stderr
-	if err := c.Run(); err != nil {
-		fmt.Printf("executor command fail: %s\n", err.Error())
-	}
+	return false
 }
 
 // GetParam 支持忽略'-'前缀

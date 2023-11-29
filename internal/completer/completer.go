@@ -1,8 +1,12 @@
 package completer
 
 import (
+	"fmt"
 	"github.com/c-bata/go-prompt"
 	"github.com/cxweilai/kubectlx/internal/command"
+	"github.com/cxweilai/kubectlx/internal/ctx"
+	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -41,7 +45,11 @@ func (c *Completer) Exec(cmd string) {
 		c.cmd.Help()
 		return
 	}
-	execCmd.Exec()
+	if execCmd.Exec() {
+		return
+	}
+	// c.cmd.Help()
+	execKubectl(cmd)
 }
 
 func (c *Completer) Complete(d prompt.Document) []prompt.Suggest {
@@ -106,4 +114,15 @@ func (c *Completer) getCommandSuggests(cmd *command.Command) []prompt.Suggest {
 		return suggests
 	}
 	return []prompt.Suggest{}
+}
+
+func execKubectl(input string) {
+	exec.Command("/bin/sh", "-c", "export KUBECONFIG=", ctx.GetKubeconfig())
+	c := exec.Command("/bin/sh", "-c", "kubectl "+input)
+	c.Stdin = os.Stdin
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
+	if err := c.Run(); err != nil {
+		fmt.Printf("executor command fail: %s\n", err.Error())
+	}
 }
