@@ -20,8 +20,13 @@ func NewCompleter() *Completer {
 	}
 }
 
-func (c *Completer) Help() {
-	c.cmd.Help()
+func (c *Completer) Exec(cmd string) {
+	execCmd := command.ParseExecCommand(c.cmd.Commands, strings.TrimSpace(cmd))
+	if execCmd == nil {
+		c.cmd.Help()
+		return
+	}
+	execCmd.Exec()
 }
 
 func (c *Completer) Complete(d prompt.Document) []prompt.Suggest {
@@ -43,21 +48,21 @@ func (c *Completer) getArgs(d prompt.Document) []string {
 
 func (c *Completer) doGetLastCmd(cmd *command.Command, args []string) []prompt.Suggest {
 	if len(args) == 0 {
-		return c.GetCommandSuggests(cmd)
+		return c.getCommandSuggests(cmd)
 	}
 	firstArg := args[0]
 	for _, subCmd := range cmd.Commands {
 		if strings.EqualFold(subCmd.Name, firstArg) {
 			if len(args) == 1 {
-				return c.GetCommandSuggests(subCmd)
+				return c.getCommandSuggests(subCmd)
 			}
 			return c.doGetLastCmd(subCmd, args[1:])
 		}
 	}
-	return c.GetCommandSuggests(cmd)
+	return c.getCommandSuggests(cmd)
 }
 
-func (c *Completer) GetCommandSuggests(cmd *command.Command) []prompt.Suggest {
+func (c *Completer) getCommandSuggests(cmd *command.Command) []prompt.Suggest {
 	if cmd.Commands != nil {
 		var suggests []prompt.Suggest
 		for _, subCmd := range cmd.Commands {
@@ -69,7 +74,7 @@ func (c *Completer) GetCommandSuggests(cmd *command.Command) []prompt.Suggest {
 		return suggests
 	} else if cmd.DynamicCommand != nil {
 		var suggests []prompt.Suggest
-		for _, dp := range cmd.DynamicCommand() {
+		for _, dp := range cmd.DynamicCommand.Func() {
 			suggests = append(suggests, prompt.Suggest{
 				Text: dp,
 			})

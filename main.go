@@ -5,7 +5,6 @@ import (
 	"github.com/c-bata/go-prompt"
 	"github.com/cxweilai/kubectlx/internal/completer"
 	"github.com/cxweilai/kubectlx/internal/ctx"
-	"github.com/cxweilai/kubectlx/internal/executor"
 	"github.com/cxweilai/kubectlx/internal/option"
 )
 
@@ -16,7 +15,7 @@ func main() {
 	ctx.InitWithConfig(cfg)
 
 	c := completer.NewCompleter()
-	p := prompt.New(executor.CmdExecutor, c.Complete,
+	p := prompt.New(c.Exec, c.Complete,
 		prompt.OptionTitle("kubectlx: interactive kubernetes client"),
 		prompt.OptionPrefix("kubectlx >>> "),
 	)

@@ -2,9 +2,10 @@ package completer
 
 import (
 	"context"
+	"fmt"
 	"github.com/cxweilai/kubectlx/internal/command"
 	"github.com/cxweilai/kubectlx/internal/ctx"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/cxweilai/kubectlx/internal/kube"
 	"k8s.io/utils/io"
 	"os"
 	"strings"
@@ -14,16 +15,57 @@ func NewUseCommand() *command.Command {
 	return &command.Command{
 		Name:        "use",
 		Description: "使用该命令切换集群或Namespace",
+		Func: func(cmd *command.ExecCmd) {
+			cmd.Command.Help()
+		},
 		Commands: []*command.Command{
 			{
-				Name:           "cluster",
-				Description:    "切换集群",
-				DynamicCommand: listKubeconfig,
+				Name:        "cluster",
+				Description: "切换集群",
+				DynamicCommand: &command.DynamicCommand{
+					Func:        listKubeconfig,
+					Description: "kubeconfig文件路径",
+				},
+				Func: func(cmd *command.ExecCmd) {
+					if cmd.Child == nil {
+						cmd.Command.Help()
+						return
+					}
+					// DynamicCommand
+					ctx.SetKubeconfig(cmd.Child.Name)
+					fmt.Println("success")
+				},
 			},
 			{
-				Name:           "namespace",
-				Description:    "切换Namespace",
-				DynamicCommand: listNamespace,
+				Name:        "namespace",
+				Description: "切换Namespace",
+				DynamicCommand: &command.DynamicCommand{
+					Func: func() []string {
+						namespaces := []string{
+							"-A",
+						}
+						return append(namespaces, kube.GetAllNamespace(context.TODO())...)
+					},
+					Description: "namespace的名称",
+				},
+				Func: func(cmd *command.ExecCmd) {
+					if cmd.Child == nil && len(cmd.Params) == 0 {
+						cmd.Command.Help()
+						return
+					}
+					_, err := kube.GetKubeClientWithContext()
+					if err != nil {
+						fmt.Println("命令执行失败，连接集群失败。")
+						return
+					}
+					// DynamicCommand
+					if cmd.Child != nil {
+						ctx.SetKubeconfig(cmd.Child.Name)
+					} else if _, ok := cmd.GetParam("A"); ok {
+						ctx.SetNamespace("*")
+					}
+					fmt.Println("success")
+				},
 			},
 		},
 	}
@@ -59,23 +101,4 @@ func rangeListKubeconfig(dir string) []string {
 		list = append(list, dir+"/"+entrie.Name())
 	}
 	return list
-}
-
-func listNamespace() []string {
-	namespaceNames := []string{
-		"-A",
-	}
-	clientSet, err := ctx.GetKubeClientWithContext()
-	if err != nil {
-		return namespaceNames
-	}
-	nsClient := clientSet.CoreV1().Namespaces()
-	namespaces, err := nsClient.List(context.TODO(), v1.ListOptions{})
-	if err != nil {
-		return namespaceNames
-	}
-	for _, ns := range namespaces.Items {
-		namespaceNames = append(namespaceNames, ns.Name)
-	}
-	return namespaceNames
 }
