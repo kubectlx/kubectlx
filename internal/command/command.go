@@ -5,43 +5,47 @@ import (
 	"fmt"
 )
 
-type Param struct {
+type Option struct {
 	Name        string
 	Description string
 }
 
-func (p *Param) Check() error {
-	if p.Description == "" {
-		return errors.New("param name required")
+func (p *Option) Check() error {
+	if p.Name == "" {
+		return errors.New("option name required")
 	}
 	if p.Description == "" {
-		return errors.New("param description required")
+		return errors.New("option description required")
 	}
 	return nil
 }
 
-type DynamicCommand struct {
-	Func        func() []string
+type DynamicParam struct {
+	Func        func(input string) []string
+	Flag        string
 	Description string
 }
 
-func (dc *DynamicCommand) Check() error {
+func (dc *DynamicParam) Check() error {
+	if dc.Flag == "" {
+		return errors.New("dynamic param flag required")
+	}
 	if dc.Description == "" {
-		return errors.New("dynamic command description required")
+		return errors.New("dynamic param description required")
 	}
 	if dc.Func == nil {
-		return errors.New("dynamic command fun required")
+		return errors.New("dynamic param fun required")
 	}
 	return nil
 }
 
 type Command struct {
-	Name           string
-	Description    string
-	Commands       []*Command
-	Args           []*Param
-	DynamicCommand *DynamicCommand
-	Run            func(cmd *ExecCmd)
+	Name         string
+	Description  string
+	Commands     []*Command
+	Options      []*Option
+	DynamicParam *DynamicParam
+	Run          func(cmd *ExecCmd)
 }
 
 func (cl *Command) AddCommand(cmds ...*Command) {
@@ -52,21 +56,21 @@ func (cl *Command) AddCommand(cmds ...*Command) {
 
 func (cl *Command) Help() {
 	clearLine() // 清除光标所在位置后的一行的标准输出
-	if cl.Name == "" {
-		fmt.Println("help:")
-	} else {
-		fmt.Println(cl.Name + " help:")
-	}
+	fmt.Println(cl.Name + ":")
 	if len(cl.Commands) > 0 {
 		for _, subCmd := range cl.Commands {
 			fmt.Printf("  %s\t%s\n", subCmd.Name, subCmd.Description)
 		}
-	} else if len(cl.Args) > 0 {
-		for _, param := range cl.Args {
-			fmt.Printf("  %s\t%s\n\n", param.Name, param.Description)
+	} else {
+		if cl.DynamicParam != nil {
+			fmt.Printf("  (%s)\t%s\n", cl.DynamicParam.Flag, cl.DynamicParam.Description)
 		}
-	} else if cl.DynamicCommand != nil {
-		fmt.Printf("  %s\n", cl.DynamicCommand.Description)
+		if len(cl.Options) > 0 {
+			fmt.Println("  options:")
+			for _, option := range cl.Options {
+				fmt.Printf("    %s\t%s\n", option.Name, option.Description)
+			}
+		}
 	}
 }
 
@@ -91,13 +95,13 @@ func (cl *Command) Check() error {
 			cmd.Command.Help()
 		}
 	}
-	if cl.DynamicCommand != nil {
-		if err := cl.DynamicCommand.Check(); err != nil {
+	if cl.DynamicParam != nil {
+		if err := cl.DynamicParam.Check(); err != nil {
 			return err
 		}
 	}
-	if len(cl.Args) > 0 {
-		for _, arg := range cl.Args {
+	if len(cl.Options) > 0 {
+		for _, arg := range cl.Options {
 			if err := arg.Check(); err != nil {
 				return err
 			}

@@ -1,15 +1,23 @@
 package completer
 
 import (
-	"context"
 	"fmt"
 	"github.com/cxweilai/kubectlx/internal/command"
 	"github.com/cxweilai/kubectlx/internal/ctx"
-	"github.com/cxweilai/kubectlx/internal/kube"
 	"k8s.io/utils/io"
 	"os"
 	"strings"
 )
+
+func NewContextCommand() *command.Command {
+	return &command.Command{
+		Name:        "context",
+		Description: "显示当前会话的配置",
+		Run: func(cmd *command.ExecCmd) {
+			ctx.ShowCtxInfo()
+		},
+	}
+}
 
 func NewUseCommand() *command.Command {
 	return &command.Command{
@@ -19,8 +27,9 @@ func NewUseCommand() *command.Command {
 			{
 				Name:        "cluster",
 				Description: "切换集群",
-				DynamicCommand: &command.DynamicCommand{
+				DynamicParam: &command.DynamicParam{
 					Func:        listKubeconfig,
+					Flag:        "KUBECONFIG_FILE_PATH",
 					Description: "kubeconfig文件路径",
 				},
 				Run: func(cmd *command.ExecCmd) {
@@ -29,20 +38,24 @@ func NewUseCommand() *command.Command {
 						return
 					}
 					// DynamicCommand
-					ctx.SetKubeconfig(cmd.Child.Name)
-					fmt.Println("success")
+					if err := ctx.SetKubeconfig(cmd.Child.Name); err != nil {
+						fmt.Println("the kubeconfig is not available: " + err.Error())
+					} else {
+						fmt.Println("success")
+					}
 				},
 			},
 			{
 				Name:        "namespace",
 				Description: "切换Namespace",
-				DynamicCommand: &command.DynamicCommand{
-					Func: func() []string {
+				DynamicParam: &command.DynamicParam{
+					Func: func(input string) []string {
 						namespaces := []string{
 							"-A",
 						}
-						return append(namespaces, kube.GetAllNamespace(context.TODO())...)
+						return append(namespaces, ctx.GetAllNamespace()...)
 					},
+					Flag:        "NAMESPACE_NAME",
 					Description: "namespace的名称",
 				},
 				Run: func(cmd *command.ExecCmd) {
@@ -50,15 +63,10 @@ func NewUseCommand() *command.Command {
 						cmd.Command.Help()
 						return
 					}
-					_, err := kube.GetKubeClientWithContext()
-					if err != nil {
-						fmt.Println("命令执行失败，连接集群失败。")
-						return
-					}
 					// DynamicCommand
 					if cmd.Child != nil {
-						ctx.SetKubeconfig(cmd.Child.Name)
-					} else if _, ok := cmd.GetParam("A"); ok {
+						ctx.SetNamespace(cmd.Child.Name)
+					} else if _, ok := cmd.GetParam("-A"); ok {
 						ctx.SetNamespace("*")
 					}
 					fmt.Println("success")
@@ -68,8 +76,8 @@ func NewUseCommand() *command.Command {
 	}
 }
 
-func listKubeconfig() []string {
-	dir := ctx.GetKubeHome()
+func listKubeconfig(input string) []string {
+	dir := ctx.GetHome() + "/.kube"
 	return rangeListKubeconfig(dir)
 }
 

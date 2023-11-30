@@ -31,7 +31,7 @@ func (ec *ExecCmd) GetParam(name string) (string, bool) {
 	if ec.Params == nil {
 		return "", false
 	}
-	if strings.HasPrefix(name, "-") {
+	if !strings.HasPrefix(name, "-") {
 		v, ok := ec.Params["-"+name]
 		return v, ok
 	} else {

@@ -4,20 +4,47 @@ import (
 	"fmt"
 	"github.com/c-bata/go-prompt"
 	"github.com/cxweilai/kubectlx/internal/command"
-	"github.com/cxweilai/kubectlx/internal/ctx"
-	"os"
-	"os/exec"
 	"strings"
 )
 
 type Completer struct {
-	cmd *command.Command
+	systemCmd    *command.Command
+	contextCmd   *command.Command
+	kubeCmd      *command.Command
+	extensionCmd *command.Command
+	cmd          *command.Command
 }
 
 func NewCompleter() *Completer {
-	commands := NewSystemCommand()
-	commands = append(commands, NewUseCommand())
+	contextCmd := &command.Command{
+		Name: "Context Command",
+		Commands: []*command.Command{
+			NewContextCommand(),
+			NewUseCommand(),
+		},
+	}
+	systemCmd := &command.Command{
+		Name:     "System Command",
+		Commands: NewSystemCommand(),
+	}
+	kubeCmd := &command.Command{
+		Name: "Kube Command",
+		Commands: []*command.Command{
+			NewKubeLogsCommand(),
+		},
+	}
+	var commands []*command.Command
+	commands = append(commands, contextCmd.Commands...)
+	commands = append(commands, systemCmd.Commands...)
+	commands = append(commands, kubeCmd.Commands...)
 	c := &Completer{
+		contextCmd: contextCmd,
+		systemCmd:  systemCmd,
+		kubeCmd:    kubeCmd,
+		extensionCmd: &command.Command{
+			Name:     "Extension Command",
+			Commands: []*command.Command{},
+		},
 		cmd: &command.Command{
 			Commands: commands,
 		},
@@ -36,76 +63,101 @@ func (c *Completer) Registry(cmd ...*command.Command) {
 			panic(err)
 		}
 	}
+	c.extensionCmd.Commands = append(c.extensionCmd.Commands, cmd...)
 	c.cmd.Commands = append(c.cmd.Commands, cmd...)
 }
 
+func (c *Completer) Help() {
+	c.systemCmd.Help()
+	c.contextCmd.Help()
+	c.kubeCmd.Help()
+	if len(c.extensionCmd.Commands) > 0 {
+		c.extensionCmd.Help()
+	}
+}
+
 func (c *Completer) Exec(cmd string) {
+	if cmd == "help" {
+		c.Help()
+		return
+	}
 	execCmd := command.ParseExecCommand(c.cmd.Commands, strings.TrimSpace(cmd))
 	if execCmd == nil {
-		c.cmd.Help()
 		return
 	}
 	if execCmd.Exec() {
 		return
 	}
-	// c.cmd.Help()
-	execKubectl(cmd)
+	fmt.Println(fmt.Sprintf("cmd '%s' not found.", cmd))
+	fmt.Println("Use the \"help\" command to view supported commands.")
 }
 
 func (c *Completer) Complete(d prompt.Document) []prompt.Suggest {
-	args := c.getArgs(d)
+	// 正常空字符串分割后数组长度为1，元素为空字符串："" => [""]
+	args := strings.Split(d.TextBeforeCursor(), " ")
 	suggests := c.doGetLastCmd(c.cmd, args)
 	return prompt.FilterHasPrefix(suggests, d.GetWordBeforeCursor(), true)
 }
 
-func (c *Completer) getArgs(d prompt.Document) []string {
-	args := strings.Split(d.TextBeforeCursor(), " ")
-	var fArgs []string
-	for _, arg := range args {
-		if arg != "" {
-			fArgs = append(fArgs, arg)
-		}
-	}
-	return fArgs
-}
-
 func (c *Completer) doGetLastCmd(cmd *command.Command, args []string) []prompt.Suggest {
 	if len(args) == 0 {
-		return c.getCommandSuggests(cmd)
+		return []prompt.Suggest{}
 	}
 	firstArg := args[0]
 	for _, subCmd := range cmd.Commands {
 		if strings.EqualFold(subCmd.Name, firstArg) {
-			if len(args) == 1 {
-				return c.getCommandSuggests(subCmd)
-			}
 			return c.doGetLastCmd(subCmd, args[1:])
 		}
 	}
-	return c.getCommandSuggests(cmd)
+	return c.getCommandSuggests(cmd, args)
 }
 
-func (c *Completer) getCommandSuggests(cmd *command.Command) []prompt.Suggest {
+func (c *Completer) getCommandSuggests(cmd *command.Command, args []string) []prompt.Suggest {
+	// 1.子命令
 	if cmd.Commands != nil {
+		// 不合法校验
+		// 例如：'c '，输入c之后再输入空格，由于c不匹配，此时args有两个参数，一个是'c'一个是' '，空格之后就不应该模糊匹配了
+		if len(args) > 1 {
+			return []prompt.Suggest{}
+		}
+		// 做模糊匹配，避免忽略前面的输入
+		// 例如：'xxx '，由于xxx不存在，不过滤的话，空格之后会匹配到根命令，拿根命令的子命令；
+		//      'use xxx '，由于xxx不存在，不过滤的话，空格之后会匹配到父命令'use'，拿‘use’的子命令。
+		lastArg := ""
+		if len(args) > 0 {
+			lastArg = args[0]
+		}
 		var suggests []prompt.Suggest
 		for _, subCmd := range cmd.Commands {
+			if !strings.HasPrefix(subCmd.Name, lastArg) {
+				continue
+			}
 			suggests = append(suggests, prompt.Suggest{
 				Text:        subCmd.Name,
 				Description: subCmd.Description,
 			})
 		}
 		return suggests
-	} else if cmd.DynamicCommand != nil {
+	}
+	// 2.参数
+	// len(args) <= 1 ==> 避免参数输入完后还提示输入参数，例如：'logs xxx '，在xxx之后、空格之后，还提示输入参数
+	if cmd.DynamicParam != nil && len(args) <= 1 {
+		lastArg := ""
+		if len(args) > 0 {
+			lastArg = args[len(args)-1]
+		}
 		var suggests []prompt.Suggest
-		for _, dp := range cmd.DynamicCommand.Func() {
+		for _, dp := range cmd.DynamicParam.Func(lastArg) {
 			suggests = append(suggests, prompt.Suggest{
 				Text: dp,
 			})
 		}
 		return suggests
-	} else if len(cmd.Args) != 0 {
+	}
+	// 3.Options
+	if len(cmd.Options) != 0 {
 		var suggests []prompt.Suggest
-		for _, option := range cmd.Args {
+		for _, option := range cmd.Options {
 			suggests = append(suggests, prompt.Suggest{
 				Text:        option.Name,
 				Description: option.Description,
@@ -113,16 +165,6 @@ func (c *Completer) getCommandSuggests(cmd *command.Command) []prompt.Suggest {
 		}
 		return suggests
 	}
+	// 4.没有子命令、参数、Options
 	return []prompt.Suggest{}
-}
-
-func execKubectl(input string) {
-	exec.Command("/bin/sh", "-c", "export KUBECONFIG=", ctx.GetKubeconfig())
-	c := exec.Command("/bin/sh", "-c", "kubectl "+input)
-	c.Stdin = os.Stdin
-	c.Stdout = os.Stdout
-	c.Stderr = os.Stderr
-	if err := c.Run(); err != nil {
-		fmt.Printf("executor command fail: %s\n", err.Error())
-	}
 }

@@ -3,7 +3,6 @@ package completer
 import (
 	"fmt"
 	"github.com/cxweilai/kubectlx/internal/command"
-	"github.com/cxweilai/kubectlx/internal/ctx"
 	"os"
 	"os/exec"
 	"runtime"
@@ -32,13 +31,6 @@ func NewSystemCommand() []*command.Command {
 			Description: "清空屏幕",
 			Run: func(cmd *command.ExecCmd) {
 				_ = clearScreen()
-			},
-		},
-		{
-			Name:        "context",
-			Description: "显示当前会话的配置",
-			Run: func(cmd *command.ExecCmd) {
-				ctx.ShowCtxInfo()
 			},
 		},
 	}

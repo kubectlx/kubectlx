@@ -29,9 +29,9 @@ func getExecCmdArgs(cmd string) []string {
 	return fArgs
 }
 
-// '-'开头的一定是配置参数，但参数名后面不一定是参数值，可能参数不需要值，例如：'-it' 是参数 '-n default' 也是参数
-// 不带'-'开头的，前面一个是带'-'开头的，那么一定是前面参数的参数值，否则就是命令，
-// 例如：kubectl get pod xxx 其中'xxx'不当作参数，而当作命令，指动态命令（DynamicCommand）
+// '-'开头的一定是option，但option后面不一定是option的值，可能option不需要值，例如：'-it'
+// 不带'-'开头的，前面一个是带'-'开头的，那么一定是前面option的值，否则就是命令或者参数
+// 例如：kubectl get pod xxx 其中'xxx'是动态参数（DynamicParam）
 func parseExecCmdAndArgs(args []string, input string) *ExecCmd {
 	var (
 		command *ExecCmd
