@@ -1,27 +1,31 @@
 package ctx
 
 import (
+	"github.com/cxweilai/kubectlx/internal/command"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"strings"
 )
 
-func GetNamespaces() []string {
-	var namespaceNames []string
+func GetNamespaces() []*command.Param {
+	var namespaceNames []*command.Param
 	namespaces, err := client.informerFactory.Core().V1().Namespaces().
 		Lister().List(labels.Everything())
 	if err != nil {
 		return namespaceNames
 	}
 	for _, ns := range namespaces {
-		namespaceNames = append(namespaceNames, ns.Name)
+		namespaceNames = append(namespaceNames, &command.Param{
+			Name:        ns.Name,
+			Description: string(ns.Status.Phase),
+		})
 	}
 	return namespaceNames
 }
 
-func GetPods(namePrefix string, limit int) []string {
+func GetPods(namePrefix string, limit int) []*command.Param {
 	var (
-		podNames []string
+		podNames []*command.Param
 		pods     []*v1.Pod
 		err      error
 	)
@@ -35,7 +39,10 @@ func GetPods(namePrefix string, limit int) []string {
 		if !strings.HasPrefix(pod.Name, namePrefix) {
 			continue
 		}
-		podNames = append(podNames, pod.Name)
+		podNames = append(podNames, &command.Param{
+			Name:        pod.Name,
+			Description: string(pod.Status.Phase),
+		})
 		cnt++
 		if cnt == limit {
 			break

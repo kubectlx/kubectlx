@@ -44,7 +44,7 @@ func NewUseCommand() *command.Command {
 				Name:        "namespace",
 				Description: "切换Namespace",
 				DynamicParam: &command.DynamicParam{
-					Func: func(input string) []string {
+					Func: func(input string) []*command.Param {
 						return ctx.GetNamespaces()
 					},
 					Flag:        "NAMESPACE_NAME",
@@ -59,23 +59,23 @@ func NewUseCommand() *command.Command {
 	}
 }
 
-func listKubeconfig(input string) []string {
+func listKubeconfig(input string) []*command.Param {
 	dir := ctx.GetHome() + "/.kube"
 	return rangeListKubeconfig(dir)
 }
 
-func rangeListKubeconfig(dir string) []string {
+func rangeListKubeconfig(dir string) []*command.Param {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return []string{}
+		return []*command.Param{}
 	}
-	var list []string
+	var result []*command.Param
 	for _, entrie := range entries {
 		if entrie.IsDir() {
 			if entrie.Name() == "cache" {
 				continue
 			}
-			list = append(list, rangeListKubeconfig(dir+"/"+entrie.Name())...)
+			result = append(result, rangeListKubeconfig(dir+"/"+entrie.Name())...)
 			continue
 		}
 		f, err := os.Open(dir + "/" + entrie.Name())
@@ -86,7 +86,10 @@ func rangeListKubeconfig(dir string) []string {
 		if !strings.Contains(string(head), "apiVersion") {
 			continue
 		}
-		list = append(list, dir+"/"+entrie.Name())
+		result = append(result, &command.Param{
+			Name:        dir + "/" + entrie.Name(),
+			Description: "",
+		})
 	}
-	return list
+	return result
 }

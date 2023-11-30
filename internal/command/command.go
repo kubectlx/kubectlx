@@ -20,8 +20,15 @@ func (p *Option) Check() error {
 	return nil
 }
 
+type Param struct {
+	Name        string
+	Description string
+}
+
 type DynamicParam struct {
-	Func        func(input string) []string
+	// input 当前最后输入的字符串用于支持模糊查询
+	// return map[string]string key为值，value为描述
+	Func        func(input string) []*Param
 	Flag        string
 	Description string
 }

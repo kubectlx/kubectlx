@@ -153,9 +153,10 @@ func (c *Completer) getCommandSuggests(cmd *command.Command, args []string) []pr
 			lastArg = args[len(args)-1]
 		}
 		var suggests []prompt.Suggest
-		for _, dp := range cmd.DynamicParam.Func(lastArg) {
+		for _, p := range cmd.DynamicParam.Func(lastArg) {
 			suggests = append(suggests, prompt.Suggest{
-				Text: dp,
+				Text:        p.Name,
+				Description: p.Description,
 			})
 		}
 		return suggests

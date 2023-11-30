@@ -20,7 +20,7 @@ func NewKubeLogsCommand() *command.Command {
 			},
 		},
 		DynamicParam: &command.DynamicParam{
-			Func: func(input string) []string {
+			Func: func(input string) []*command.Param {
 				return ctx.GetPods(input, 5)
 			},
 			Flag:        "POD_NAME",
