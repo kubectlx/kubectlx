@@ -26,12 +26,8 @@ func NewKubeLogsCommand() *command.Command {
 			Flag:        "POD_NAME",
 			Description: "Pod名",
 		},
-		Run: func(cmd *command.ExecCmd) {
-			if cmd.Child == nil {
-				cmd.Command.Help()
-				return
-			}
+		Run: WarpHelp(func(cmd *command.ExecCmd) {
 			execKubectl(cmd.Input)
-		},
+		}),
 	}
 }

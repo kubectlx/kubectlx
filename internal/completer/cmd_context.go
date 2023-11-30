@@ -16,6 +16,7 @@ func NewContextCommand() *command.Command {
 		Run: func(cmd *command.ExecCmd) {
 			ctx.ShowCtxInfo()
 		},
+		IgnoreFlags: true,
 	}
 }
 
@@ -32,45 +33,28 @@ func NewUseCommand() *command.Command {
 					Flag:        "KUBECONFIG_FILE_PATH",
 					Description: "kubeconfig文件路径",
 				},
-				Run: func(cmd *command.ExecCmd) {
-					if cmd.Child == nil {
-						cmd.Command.Help()
-						return
-					}
-					// DynamicCommand
-					if err := ctx.SetKubeconfig(cmd.Child.Name); err != nil {
+				Run: WarpHelp(func(cmd *command.ExecCmd) {
+					if err := ctx.SetKubeconfig(cmd.Param); err != nil {
 						fmt.Println("the kubeconfig is not available: " + err.Error())
 					} else {
 						fmt.Println("success")
 					}
-				},
+				}),
 			},
 			{
 				Name:        "namespace",
 				Description: "切换Namespace",
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []string {
-						namespaces := []string{
-							"-A",
-						}
-						return append(namespaces, ctx.GetAllNamespace()...)
+						return ctx.GetNamespaces()
 					},
 					Flag:        "NAMESPACE_NAME",
 					Description: "namespace的名称",
 				},
-				Run: func(cmd *command.ExecCmd) {
-					if cmd.Child == nil && len(cmd.Params) == 0 {
-						cmd.Command.Help()
-						return
-					}
-					// DynamicCommand
-					if cmd.Child != nil {
-						ctx.SetNamespace(cmd.Child.Name)
-					} else if _, ok := cmd.GetParam("-A"); ok {
-						ctx.SetNamespace("*")
-					}
+				Run: WarpHelp(func(cmd *command.ExecCmd) {
+					ctx.SetNamespace(cmd.Param)
 					fmt.Println("success")
-				},
+				}),
 			},
 		},
 	}

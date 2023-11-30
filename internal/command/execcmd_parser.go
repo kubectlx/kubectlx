@@ -15,6 +15,7 @@ func ParseExecCommand(command []*Command, input string) (execCmd *ExecCmd) {
 		root = root.Parent
 	}
 	bindCommand(command, root)
+	rebindParamAndOptionsToLastSubCommand(execCmd)
 	return
 }
 
@@ -36,17 +37,17 @@ func parseExecCmdAndArgs(args []string, input string) *ExecCmd {
 	var (
 		command *ExecCmd
 		parent  *ExecCmd
-		params  = map[string]string{}
+		options = map[string]string{}
 	)
 	for idx := 0; idx < len(args); {
 		arg := args[idx]
 		if strings.HasPrefix(arg, "-") {
 			if len(args) <= idx+1 || strings.HasPrefix(args[idx+1], "-") {
-				params[args[idx]] = ""
+				options[args[idx]] = ""
 				idx += 1
 				continue
 			}
-			params[args[idx]] = args[idx+1]
+			options[args[idx]] = args[idx+1]
 			idx += 2
 			continue
 		}
@@ -64,10 +65,11 @@ func parseExecCmdAndArgs(args []string, input string) *ExecCmd {
 	if command == nil {
 		return nil
 	}
-	command.Params = params
+	command.Options = options
 	return command
 }
 
+// 将执行命令与声明命令关联
 func bindCommand(commands []*Command, execCmd *ExecCmd) {
 	if len(commands) == 0 || execCmd == nil {
 		return
@@ -78,5 +80,20 @@ func bindCommand(commands []*Command, execCmd *ExecCmd) {
 			bindCommand(c.Commands, execCmd.Child)
 			return
 		}
+	}
+}
+
+// 将动态参数和Options重新绑定到最后一个子命令
+func rebindParamAndOptionsToLastSubCommand(execCmd *ExecCmd) {
+	if execCmd.Command != nil {
+		return
+	}
+	ptr := execCmd
+	if ptr.Command == nil && ptr.Parent != nil {
+		ptr = ptr.Parent
+		ptr.Options = execCmd.Options
+		ptr.Param = execCmd.Name
+		ptr.Child = nil
+		execCmd = ptr
 	}
 }

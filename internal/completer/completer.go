@@ -154,17 +154,15 @@ func (c *Completer) getCommandSuggests(cmd *command.Command, args []string) []pr
 		}
 		return suggests
 	}
-	// 3.Options
-	if len(cmd.Options) != 0 {
-		var suggests []prompt.Suggest
+	// 3. options
+	var suggests []prompt.Suggest
+	if len(cmd.Options) > 0 {
 		for _, option := range cmd.Options {
 			suggests = append(suggests, prompt.Suggest{
 				Text:        option.Name,
 				Description: option.Description,
 			})
 		}
-		return suggests
 	}
-	// 4.没有子命令、参数、Options
-	return []prompt.Suggest{}
+	return suggests
 }

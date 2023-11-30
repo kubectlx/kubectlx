@@ -1,13 +1,15 @@
 package ctx
 
 import (
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"strings"
 )
 
-func GetAllNamespace() []string {
+func GetNamespaces() []string {
 	var namespaceNames []string
-	namespaces, err := client.informerFactory.Core().V1().Namespaces().Lister().List(labels.Everything())
+	namespaces, err := client.informerFactory.Core().V1().Namespaces().
+		Lister().List(labels.Everything())
 	if err != nil {
 		return namespaceNames
 	}
@@ -18,8 +20,13 @@ func GetAllNamespace() []string {
 }
 
 func GetPods(namePrefix string, limit int) []string {
-	var podNames []string
-	pods, err := client.informerFactory.Core().V1().Pods().Lister().Pods(GetNamespace()).List(labels.Everything())
+	var (
+		podNames []string
+		pods     []*v1.Pod
+		err      error
+	)
+	podList := client.informerFactory.Core().V1().Pods().Lister()
+	pods, err = podList.Pods(GetNamespace()).List(labels.Everything())
 	if err != nil {
 		return podNames
 	}

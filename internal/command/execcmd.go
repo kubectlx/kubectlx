@@ -4,12 +4,12 @@ import (
 	"strings"
 )
 
-// ExecCmd include DynamicCommand
 type ExecCmd struct {
 	Name    string
 	Child   *ExecCmd
 	Parent  *ExecCmd
-	Params  map[string]string
+	Param   string
+	Options map[string]string // 包含flag
 	Command *Command
 	Input   string
 }
@@ -26,16 +26,16 @@ func (ec *ExecCmd) Exec() bool {
 	return false
 }
 
-// GetParam 支持忽略'-'前缀
-func (ec *ExecCmd) GetParam(name string) (string, bool) {
-	if ec.Params == nil {
+// GetOption 支持忽略'-'前缀
+func (ec *ExecCmd) GetOption(name string) (string, bool) {
+	if ec.Options == nil {
 		return "", false
 	}
 	if !strings.HasPrefix(name, "-") {
-		v, ok := ec.Params["-"+name]
+		v, ok := ec.Options["-"+name]
 		return v, ok
 	} else {
-		v, ok := ec.Params[name]
+		v, ok := ec.Options[name]
 		return v, ok
 	}
 }

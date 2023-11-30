@@ -46,6 +46,7 @@ type Command struct {
 	Options      []*Option
 	DynamicParam *DynamicParam
 	Run          func(cmd *ExecCmd)
+	IgnoreFlags  bool
 }
 
 func (cl *Command) AddCommand(cmds ...*Command) {
@@ -64,6 +65,12 @@ func (cl *Command) Help() {
 	} else {
 		if cl.DynamicParam != nil {
 			fmt.Printf("  (%s)\t%s\n", cl.DynamicParam.Flag, cl.DynamicParam.Description)
+		}
+		if len(flags) > 0 {
+			fmt.Println("  flags:")
+			for _, f := range flags {
+				fmt.Printf("  %s\t%s\n", f.Name, f.Description)
+			}
 		}
 		if len(cl.Options) > 0 {
 			fmt.Println("  options:")
@@ -87,6 +94,7 @@ func (cl *Command) Check() error {
 		return errors.New("command description required")
 	}
 	if cl.Run == nil {
+		// 叶子命令必须指定Run方法
 		if len(cl.Commands) == 0 {
 			return errors.New("command func required")
 		}

@@ -17,6 +17,7 @@ func NewSystemCommand() []*command.Command {
 				fmt.Println("Bye!")
 				os.Exit(0)
 			},
+			IgnoreFlags: true,
 		},
 		{
 			Name:        "exit",
@@ -25,6 +26,7 @@ func NewSystemCommand() []*command.Command {
 				fmt.Println("Bye!")
 				os.Exit(0)
 			},
+			IgnoreFlags: true,
 		},
 		{
 			Name:        "clear",
@@ -32,6 +34,7 @@ func NewSystemCommand() []*command.Command {
 			Run: func(cmd *command.ExecCmd) {
 				_ = clearScreen()
 			},
+			IgnoreFlags: true,
 		},
 	}
 }
