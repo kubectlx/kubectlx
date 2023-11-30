@@ -34,8 +34,8 @@ func NewCompleter() *Completer {
 		},
 	}
 	var commands []*command.Command
-	commands = append(commands, contextCmd.Commands...)
 	commands = append(commands, systemCmd.Commands...)
+	commands = append(commands, contextCmd.Commands...)
 	commands = append(commands, kubeCmd.Commands...)
 	c := &Completer{
 		contextCmd: contextCmd,
@@ -54,6 +54,16 @@ func NewCompleter() *Completer {
 			panic(err)
 		}
 	}
+	// 追加help命令到头部
+	c.cmd.Commands = append([]*command.Command{
+		{
+			Name:        "help",
+			Description: "帮助命令",
+			Run: func(cmd *command.ExecCmd) {
+				c.Help()
+			},
+		},
+	}, c.cmd.Commands...)
 	return c
 }
 
@@ -77,10 +87,6 @@ func (c *Completer) Help() {
 }
 
 func (c *Completer) Exec(cmd string) {
-	if cmd == "help" {
-		c.Help()
-		return
-	}
 	execCmd := command.ParseExecCommand(c.cmd.Commands, strings.TrimSpace(cmd))
 	if execCmd == nil {
 		return

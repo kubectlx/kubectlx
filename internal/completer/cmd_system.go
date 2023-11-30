@@ -11,22 +11,12 @@ import (
 func NewSystemCommand() []*command.Command {
 	return []*command.Command{
 		{
-			Name:        "quit",
-			Description: "退出",
-			Run: func(cmd *command.ExecCmd) {
-				fmt.Println("Bye!")
-				os.Exit(0)
-			},
-			IgnoreFlags: true,
-		},
-		{
 			Name:        "exit",
 			Description: "退出",
 			Run: func(cmd *command.ExecCmd) {
 				fmt.Println("Bye!")
 				os.Exit(0)
 			},
-			IgnoreFlags: true,
 		},
 		{
 			Name:        "clear",
@@ -34,7 +24,6 @@ func NewSystemCommand() []*command.Command {
 			Run: func(cmd *command.ExecCmd) {
 				_ = clearScreen()
 			},
-			IgnoreFlags: true,
 		},
 	}
 }

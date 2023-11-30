@@ -46,7 +46,6 @@ type Command struct {
 	Options      []*Option
 	DynamicParam *DynamicParam
 	Run          func(cmd *ExecCmd)
-	IgnoreFlags  bool
 }
 
 func (cl *Command) AddCommand(cmds ...*Command) {

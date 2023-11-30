@@ -16,7 +16,6 @@ func NewContextCommand() *command.Command {
 		Run: func(cmd *command.ExecCmd) {
 			ctx.ShowCtxInfo()
 		},
-		IgnoreFlags: true,
 	}
 }
 
