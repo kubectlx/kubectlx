@@ -6,4 +6,4 @@
 # Kubernetes Generated files - skip generated files, except for vendored files
 # editor and IDE paraphernalia
 .idea
-kubectlx
+build/kubectlx*
