@@ -23,6 +23,7 @@ func (p *Option) Check() error {
 type Param struct {
 	Name        string
 	Description string
+	Extended    map[string]string
 }
 
 type DynamicParam struct {
@@ -47,12 +48,13 @@ func (dc *DynamicParam) Check() error {
 }
 
 type Command struct {
-	Name         string
-	Description  string
-	Commands     []*Command
-	Options      []*Option
-	DynamicParam *DynamicParam
-	Run          func(cmd *ExecCmd)
+	Name            string
+	Description     string
+	Commands        []*Command
+	DynamicCommands func() []*Command
+	Options         []*Option
+	DynamicParam    *DynamicParam
+	Run             func(cmd *ExecCmd)
 }
 
 func (cl *Command) AddCommand(cmds ...*Command) {
@@ -64,9 +66,17 @@ func (cl *Command) AddCommand(cmds ...*Command) {
 func (cl *Command) Help() {
 	clearLine() // 清除光标所在位置后的一行的标准输出
 	fmt.Println(cl.Name + ":")
-	if len(cl.Commands) > 0 {
-		for _, subCmd := range cl.Commands {
-			fmt.Printf("  %s\t%s\n", subCmd.Name, subCmd.Description)
+	if cl.Commands != nil || cl.DynamicCommands != nil {
+		if cl.Commands != nil {
+			for _, subCmd := range cl.Commands {
+				fmt.Printf("  %s\t%s\n", subCmd.Name, subCmd.Description)
+			}
+		}
+		// 支持动态命令
+		if cl.DynamicCommands != nil {
+			for _, subCmd := range cl.DynamicCommands() {
+				fmt.Printf("  %s\t%s\n", subCmd.Name, subCmd.Description)
+			}
 		}
 	} else {
 		if cl.DynamicParam != nil {
@@ -101,7 +111,7 @@ func (cl *Command) Check() error {
 	}
 	if cl.Run == nil {
 		// 叶子命令必须指定Run方法
-		if len(cl.Commands) == 0 {
+		if cl.Commands == nil && cl.DynamicCommands == nil {
 			return errors.New("command func required")
 		}
 		// 如果还有子命令，则当前命令的Run默认为help命令
@@ -121,7 +131,7 @@ func (cl *Command) Check() error {
 			}
 		}
 	}
-	if len(cl.Commands) > 0 {
+	if cl.Commands != nil {
 		for _, subCmd := range cl.Commands {
 			if err := subCmd.Check(); err != nil {
 				return err

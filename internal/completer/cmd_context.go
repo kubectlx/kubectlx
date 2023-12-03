@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/cxweilai/kubectlx/internal/command"
 	"github.com/cxweilai/kubectlx/internal/ctx"
+	"github.com/cxweilai/kubectlx/internal/kubecli"
 	"k8s.io/utils/io"
 	"os"
 	"strings"
@@ -45,14 +46,17 @@ func NewUseCommand() *command.Command {
 				Description: "切换Namespace",
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return ctx.GetNamespaces()
+						return kubecli.GetNamespaces()
 					},
 					Flag:        "NAMESPACE_NAME",
 					Description: "namespace的名称",
 				},
 				Run: WarpHelp(func(cmd *command.ExecCmd) {
-					ctx.SetNamespace(cmd.Param)
-					fmt.Println("success")
+					if ctx.SetNamespace(cmd.Param) {
+						fmt.Println("success")
+					} else {
+						fmt.Println("error: the namespace " + cmd.Param + " does not exist")
+					}
 				}),
 			},
 		},

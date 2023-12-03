@@ -11,6 +11,7 @@ import (
 func main() {
 	cfg := &option.Config{}
 	flag.StringVar(&cfg.Kubeconfig, "kubeconfig", "", "The kubeconfig the default use k8s cluster kubeconfig.")
+	flag.StringVar(&cfg.Namespace, "namespace", "", "The namespace is used to specify the namespace.")
 	flag.Parse()
 	ctx.InitWithConfig(cfg)
 

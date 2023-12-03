@@ -31,20 +31,30 @@ func NewCompleter() *Completer {
 		Name: "Kube Command",
 		Commands: []*command.Command{
 			NewKubeLogsCommand(),
+			NewKubeGetCommand(),
+			NewKubeDescribeCommand(),
+			NewKubeDeleteCommand(),
+			NewKubeApplyCommand(),
+			NewKubeEditCommand(),
+			NewKubeExecCommand(),
+		},
+	}
+	extendedCmd := &command.Command{
+		Name: "Extension Command",
+		Commands: []*command.Command{
+			NewExtendedStatusCommand(),
 		},
 	}
 	var commands []*command.Command
 	commands = append(commands, systemCmd.Commands...)
 	commands = append(commands, contextCmd.Commands...)
 	commands = append(commands, kubeCmd.Commands...)
+	commands = append(commands, extendedCmd.Commands...)
 	c := &Completer{
-		contextCmd: contextCmd,
-		systemCmd:  systemCmd,
-		kubeCmd:    kubeCmd,
-		extensionCmd: &command.Command{
-			Name:     "Extension Command",
-			Commands: []*command.Command{},
-		},
+		contextCmd:   contextCmd,
+		systemCmd:    systemCmd,
+		kubeCmd:      kubeCmd,
+		extensionCmd: extendedCmd,
 		cmd: &command.Command{
 			Commands: commands,
 		},
@@ -110,9 +120,23 @@ func (c *Completer) doGetLastCmd(cmd *command.Command, args []string) []prompt.S
 		return []prompt.Suggest{}
 	}
 	firstArg := args[0]
-	for _, subCmd := range cmd.Commands {
-		if strings.EqualFold(subCmd.Name, firstArg) {
-			return c.doGetLastCmd(subCmd, args[1:])
+	if cmd.Commands != nil {
+		for _, subCmd := range cmd.Commands {
+			if strings.EqualFold(subCmd.Name, firstArg) {
+				return c.doGetLastCmd(subCmd, args[1:])
+			}
+		}
+	}
+	// 支持动态命令
+	if cmd.DynamicCommands != nil {
+		for _, subCmd := range cmd.DynamicCommands() {
+			if strings.EqualFold(subCmd.Name, firstArg) {
+				suggest := c.doGetLastCmd(subCmd, args[1:])
+				if len(suggest) > 0 {
+					return suggest
+				}
+				return c.getCommandSuggests(subCmd, args)
+			}
 		}
 	}
 	return c.getCommandSuggests(cmd, args)
@@ -120,7 +144,7 @@ func (c *Completer) doGetLastCmd(cmd *command.Command, args []string) []prompt.S
 
 func (c *Completer) getCommandSuggests(cmd *command.Command, args []string) []prompt.Suggest {
 	// 1.子命令
-	if cmd.Commands != nil {
+	if cmd.Commands != nil || cmd.DynamicCommands != nil {
 		// 不合法校验
 		// 例如：'c '，输入c之后再输入空格，由于c不匹配，此时args有两个参数，一个是'c'一个是' '，空格之后就不应该模糊匹配了
 		if len(args) > 1 {
@@ -134,14 +158,28 @@ func (c *Completer) getCommandSuggests(cmd *command.Command, args []string) []pr
 			lastArg = args[0]
 		}
 		var suggests []prompt.Suggest
-		for _, subCmd := range cmd.Commands {
-			if !strings.HasPrefix(subCmd.Name, lastArg) {
-				continue
+		if cmd.Commands != nil {
+			for _, subCmd := range cmd.Commands {
+				if !strings.HasPrefix(subCmd.Name, lastArg) {
+					continue
+				}
+				suggests = append(suggests, prompt.Suggest{
+					Text:        subCmd.Name,
+					Description: subCmd.Description,
+				})
 			}
-			suggests = append(suggests, prompt.Suggest{
-				Text:        subCmd.Name,
-				Description: subCmd.Description,
-			})
+		}
+		// 支持动态命令
+		if cmd.DynamicCommands != nil {
+			for _, subCmd := range cmd.DynamicCommands() {
+				if !strings.HasPrefix(subCmd.Name, lastArg) {
+					continue
+				}
+				suggests = append(suggests, prompt.Suggest{
+					Text:        subCmd.Name,
+					Description: subCmd.Description,
+				})
+			}
 		}
 		return suggests
 	}

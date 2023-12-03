@@ -77,7 +77,17 @@ func bindCommand(commands []*Command, execCmd *ExecCmd) {
 	for _, c := range commands {
 		if c.Name == execCmd.Name {
 			execCmd.Command = c
-			bindCommand(c.Commands, execCmd.Child)
+			var childCommands []*Command
+			if len(c.Commands) > 0 {
+				childCommands = append(childCommands, c.Commands...)
+			}
+			if c.DynamicCommands != nil {
+				dCommands := c.DynamicCommands()
+				if len(dCommands) > 0 {
+					childCommands = append(childCommands, dCommands...)
+				}
+			}
+			bindCommand(childCommands, execCmd.Child)
 			return
 		}
 	}
@@ -90,10 +100,24 @@ func rebindParamAndOptionsToLastSubCommand(execCmd *ExecCmd) {
 	}
 	ptr := execCmd
 	if ptr.Command == nil && ptr.Parent != nil {
-		ptr = ptr.Parent
-		ptr.Options = execCmd.Options
-		ptr.Param = execCmd.Name
-		ptr.Child = nil
-		execCmd = ptr
+		prePtr := ptr.Parent
+		prePtr.Options = mergeMap(prePtr.Options, ptr.Options)
+		prePtr.Param = ptr.Name
+		prePtr.Child = nil
+		ptr = prePtr
 	}
+}
+
+func mergeMap(source map[string]string, target map[string]string) map[string]string {
+	if source == nil {
+		return target
+	}
+	if target == nil {
+		return source
+	}
+	// 用target，允许子命令的option覆盖父命令的option
+	for k, v := range target {
+		source[k] = v
+	}
+	return source
 }

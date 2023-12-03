@@ -7,6 +7,19 @@ func WarpHelp(f func(cmd *command.ExecCmd)) func(cmd *command.ExecCmd) {
 		if doHelpIfHelp(cmd) {
 			return
 		}
+		if cmd.Param == "" {
+			cmd.Command.Help()
+			return
+		}
+		f(cmd)
+	}
+}
+
+func WarpIgnoreNilParamHelp(f func(cmd *command.ExecCmd)) func(cmd *command.ExecCmd) {
+	return func(cmd *command.ExecCmd) {
+		if doHelpIfHelp(cmd) {
+			return
+		}
 		f(cmd)
 	}
 }
@@ -16,7 +29,7 @@ func doHelpIfHelp(cmd *command.ExecCmd) bool {
 	if !help {
 		_, help = cmd.GetOption("h")
 	}
-	if help || cmd.Param == "" {
+	if help {
 		cmd.Command.Help()
 		return true
 	}

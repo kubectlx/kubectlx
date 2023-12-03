@@ -2,6 +2,7 @@ package ctx
 
 import (
 	"fmt"
+	"github.com/cxweilai/kubectlx/internal/kubecli"
 	"github.com/cxweilai/kubectlx/internal/option"
 	"log"
 	"os"
@@ -27,13 +28,20 @@ func InitWithConfig(cfg *option.Config) {
 		fmt.Println("--kubeconfig=~/.kube/config_k3s")
 	}
 	// 初始化失败退出进程
-	if err := initKubeClientWithContext(GetKubeconfig()); err != nil {
+	if err := kubecli.InitKubeClient(GetKubeconfig()); err != nil {
 		log.Fatalln(err)
+	}
+	if SetNamespace(cfg.Namespace) {
+		fmt.Println("use namespace: " + GetNamespace())
+	} else {
+		fmt.Println("default use namespace: " + GetNamespace())
+		fmt.Print("you can specify the namespace using the '--namespace' parameter: ")
+		fmt.Println("--namespace=<your namespace>")
 	}
 }
 
 func SetKubeconfig(kubeconfig string) error {
-	if err := initKubeClientWithContext(replaceKubeconfigHomePath(kubeconfig)); err != nil {
+	if err := kubecli.InitKubeClient(replaceKubeconfigHomePath(kubeconfig)); err != nil {
 		return err
 	}
 	ctx.kubeconfig = kubeconfig
@@ -72,8 +80,20 @@ func replaceKubeconfigHomePath(kubeconfig string) string {
 	return kubeconfig
 }
 
-func SetNamespace(namespace string) {
+func SetNamespace(namespace string) bool {
+	found := false
+	namespaces := kubecli.GetNamespaces()
+	for _, ns := range namespaces {
+		if ns.Name == namespace {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return false
+	}
 	ctx.namespace = namespace
+	return true
 }
 
 func GetNamespace() string {

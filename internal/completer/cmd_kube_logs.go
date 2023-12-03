@@ -1,8 +1,10 @@
 package completer
 
 import (
+	"fmt"
 	"github.com/cxweilai/kubectlx/internal/command"
 	"github.com/cxweilai/kubectlx/internal/ctx"
+	"github.com/cxweilai/kubectlx/internal/kubecli"
 )
 
 func NewKubeLogsCommand() *command.Command {
@@ -21,13 +23,17 @@ func NewKubeLogsCommand() *command.Command {
 		},
 		DynamicParam: &command.DynamicParam{
 			Func: func(input string) []*command.Param {
-				return ctx.GetPods(input, 5)
+				return kubecli.GetPods(ctx.GetNamespace(), input, 5)
 			},
 			Flag:        "POD_NAME",
 			Description: "Pod名",
 		},
 		Run: WarpHelp(func(cmd *command.ExecCmd) {
-			execKubectl(cmd.Input)
+			if _, ok := cmd.GetOption("-f"); ok {
+				fmt.Println("error: log stream output is not supported yet")
+			} else {
+				execKubectl(cmd.Input)
+			}
 		}),
 	}
 }
