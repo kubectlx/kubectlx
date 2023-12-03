@@ -33,7 +33,7 @@ func NewExtendedStatusCommand() *command.Command {
 				Description: typeDescription("查询%s资源状态", "Pod"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetPods(ctx.GetNamespace(), input, 5)
+						return kubecli.GetPods(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "POD_NAME",
 					Description: "查询Pod状态，资源名称支持前缀模糊搜索。",
@@ -48,7 +48,7 @@ func NewExtendedStatusCommand() *command.Command {
 				Description: typeDescription("查询%s资源状态", "Service"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetServices(ctx.GetNamespace(), input, 5)
+						return kubecli.GetServices(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "SERVICE_NAME",
 					Description: "查询Service状态，资源名称支持前缀模糊搜索。",
@@ -63,7 +63,7 @@ func NewExtendedStatusCommand() *command.Command {
 				Description: typeDescription("查询%s资源状态", "Deployment"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetDeployments(ctx.GetNamespace(), input, 5)
+						return kubecli.GetDeployments(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "DEPLOYMENT_NAME",
 					Description: "查询Deployment状态，资源名称支持前缀模糊搜索。",
@@ -78,7 +78,7 @@ func NewExtendedStatusCommand() *command.Command {
 				Description: typeDescription("查询%s资源状态", "DaemonSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetDaemonSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetDaemonSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "DAEMON_SET_NAME",
 					Description: "查询DaemonSet状态，资源名称支持前缀模糊搜索。",
@@ -93,7 +93,7 @@ func NewExtendedStatusCommand() *command.Command {
 				Description: typeDescription("查询%s资源状态", "ReplicaSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetReplicaSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetReplicaSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "REPLICA_SET_NAME",
 					Description: "查询ReplicaSet状态，资源名称支持前缀模糊搜索。",
@@ -108,7 +108,7 @@ func NewExtendedStatusCommand() *command.Command {
 				Description: typeDescription("查询%s资源状态", "StatefulSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetStatefulSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetStatefulSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "STATEFUL_SET_NAME",
 					Description: "查询StatefulSet状态，资源名称支持前缀模糊搜索。",
@@ -123,7 +123,7 @@ func NewExtendedStatusCommand() *command.Command {
 				Description: typeDescription("查询%s资源状态", "Job"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetJobs(ctx.GetNamespace(), input, 5)
+						return kubecli.GetJobs(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "JOB_NAME",
 					Description: "查询Job状态，资源名称支持前缀模糊搜索。",
@@ -138,7 +138,7 @@ func NewExtendedStatusCommand() *command.Command {
 				Description: typeDescription("查询%s资源状态", "CronJob"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetCronJobs(ctx.GetNamespace(), input, 5)
+						return kubecli.GetCronJobs(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "CRON_JOB_NAME",
 					Description: "查询CronJob状态，资源名称支持前缀模糊搜索。",
@@ -159,7 +159,7 @@ func NewExtendedStatusCommand() *command.Command {
 					DynamicParam: &command.DynamicParam{
 						Func: func(input string) []*command.Param {
 							return kubecli.GetCrdResource(finalCrd.Extended["group"], finalCrd.Extended["version"], finalCrd.Name,
-								ctx.GetNamespace(), input, 5)
+								ctx.GetNamespace(), input, LIMIT_SUGGEST)
 						},
 						Flag:        strings.ToUpper(finalCrd.Name) + "_NAME",
 						Description: "查询" + finalCrd.Name + "状态，资源名称支持前缀模糊搜索。",

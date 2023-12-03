@@ -23,7 +23,7 @@ func NewKubeLogsCommand() *command.Command {
 		},
 		DynamicParam: &command.DynamicParam{
 			Func: func(input string) []*command.Param {
-				return kubecli.GetPods(ctx.GetNamespace(), input, 5)
+				return kubecli.GetPods(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 			},
 			Flag:        "POD_NAME",
 			Description: "Pod名",

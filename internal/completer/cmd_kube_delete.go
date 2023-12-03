@@ -23,7 +23,7 @@ func NewKubeDeleteCommand() *command.Command {
 				Description: typeDescription("删除%s资源", "CRD"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetCrdDefinitions(input, 5)
+						return kubecli.GetCrdDefinitions(input, LIMIT_SUGGEST)
 					},
 					Flag:        "CRD_NAME",
 					Description: "删除CRD",
@@ -53,7 +53,7 @@ func NewKubeDeleteCommand() *command.Command {
 				Description: typeDescription("删除%s资源", "Pod"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetPods(ctx.GetNamespace(), input, 5)
+						return kubecli.GetPods(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "POD_NAME",
 					Description: "删除Pod",
@@ -68,7 +68,7 @@ func NewKubeDeleteCommand() *command.Command {
 				Description: typeDescription("删除%s资源", "Service"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetServices(ctx.GetNamespace(), input, 5)
+						return kubecli.GetServices(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "SERVICE_NAME",
 					Description: "删除Service",
@@ -83,7 +83,7 @@ func NewKubeDeleteCommand() *command.Command {
 				Description: typeDescription("删除%s资源", "Deployment"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetDeployments(ctx.GetNamespace(), input, 5)
+						return kubecli.GetDeployments(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "DEPLOYMENT_NAME",
 					Description: "删除Deployment",
@@ -98,7 +98,7 @@ func NewKubeDeleteCommand() *command.Command {
 				Description: typeDescription("删除%s资源", "DaemonSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetDaemonSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetDaemonSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "DAEMON_SET_NAME",
 					Description: "删除DaemonSet",
@@ -113,7 +113,7 @@ func NewKubeDeleteCommand() *command.Command {
 				Description: typeDescription("删除%s资源", "ReplicaSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetReplicaSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetReplicaSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "REPLICA_SET_NAME",
 					Description: "删除ReplicaSet",
@@ -128,7 +128,7 @@ func NewKubeDeleteCommand() *command.Command {
 				Description: typeDescription("删除%s资源", "StatefulSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetStatefulSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetStatefulSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "STATEFUL_SET_NAME",
 					Description: "删除StatefulSet",
@@ -143,7 +143,7 @@ func NewKubeDeleteCommand() *command.Command {
 				Description: typeDescription("删除%s资源", "Job"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetJobs(ctx.GetNamespace(), input, 5)
+						return kubecli.GetJobs(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "JOB_NAME",
 					Description: "删除Job",
@@ -158,7 +158,7 @@ func NewKubeDeleteCommand() *command.Command {
 				Description: typeDescription("删除%s资源", "CronJob"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetCronJobs(ctx.GetNamespace(), input, 5)
+						return kubecli.GetCronJobs(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "CRON_JOB_NAME",
 					Description: "删除CronJob",
@@ -173,7 +173,7 @@ func NewKubeDeleteCommand() *command.Command {
 				Description: typeDescription("删除%s资源", "ConfigMap"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetConfigMaps(ctx.GetNamespace(), input, 5)
+						return kubecli.GetConfigMaps(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "CONFIG_MAP_NAME",
 					Description: "删除ConfigMap",
@@ -188,7 +188,7 @@ func NewKubeDeleteCommand() *command.Command {
 				Description: typeDescription("删除%s资源", "Secret"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetSecrets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetSecrets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "SECRET_NAME",
 					Description: "删除Secret",
@@ -209,7 +209,7 @@ func NewKubeDeleteCommand() *command.Command {
 					DynamicParam: &command.DynamicParam{
 						Func: func(input string) []*command.Param {
 							return kubecli.GetCrdResource(finalCrd.Extended["group"], finalCrd.Extended["version"], finalCrd.Name,
-								ctx.GetNamespace(), input, 5)
+								ctx.GetNamespace(), input, LIMIT_SUGGEST)
 						},
 						Flag:        strings.ToUpper(finalCrd.Name) + "_NAME",
 						Description: "删除" + finalCrd.Name,

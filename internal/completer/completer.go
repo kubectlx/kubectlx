@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const LIMIT_SUGGEST = 5
+
 type Completer struct {
 	systemCmd    *command.Command
 	contextCmd   *command.Command

@@ -17,7 +17,7 @@ func NewKubeEditCommand() *command.Command {
 				Description: typeDescription("编辑%s资源", "Pod"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetPods(ctx.GetNamespace(), input, 5)
+						return kubecli.GetPods(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "POD_NAME",
 					Description: "编辑Pod",
@@ -31,7 +31,7 @@ func NewKubeEditCommand() *command.Command {
 				Description: typeDescription("编辑%s资源", "Service"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetServices(ctx.GetNamespace(), input, 5)
+						return kubecli.GetServices(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "SERVICE_NAME",
 					Description: "编辑Service",
@@ -45,7 +45,7 @@ func NewKubeEditCommand() *command.Command {
 				Description: typeDescription("编辑%s资源", "Deployment"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetDeployments(ctx.GetNamespace(), input, 5)
+						return kubecli.GetDeployments(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "DEPLOYMENT_NAME",
 					Description: "编辑Deployment",
@@ -59,7 +59,7 @@ func NewKubeEditCommand() *command.Command {
 				Description: typeDescription("编辑%s资源", "DaemonSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetDaemonSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetDaemonSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "DAEMON_SET_NAME",
 					Description: "编辑DaemonSet",
@@ -73,7 +73,7 @@ func NewKubeEditCommand() *command.Command {
 				Description: typeDescription("编辑%s资源", "ReplicaSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetReplicaSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetReplicaSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "REPLICA_SET_NAME",
 					Description: "编辑ReplicaSet",
@@ -87,7 +87,7 @@ func NewKubeEditCommand() *command.Command {
 				Description: typeDescription("编辑%s资源", "StatefulSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetStatefulSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetStatefulSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "STATEFUL_SET_NAME",
 					Description: "编辑StatefulSet",
@@ -101,7 +101,7 @@ func NewKubeEditCommand() *command.Command {
 				Description: typeDescription("编辑%s资源", "Job"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetJobs(ctx.GetNamespace(), input, 5)
+						return kubecli.GetJobs(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "JOB_NAME",
 					Description: "编辑job",
@@ -115,7 +115,7 @@ func NewKubeEditCommand() *command.Command {
 				Description: typeDescription("编辑%s资源", "CronJob"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetCronJobs(ctx.GetNamespace(), input, 5)
+						return kubecli.GetCronJobs(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "CRON_JOB_NAME",
 					Description: "编辑CronJob",
@@ -129,7 +129,7 @@ func NewKubeEditCommand() *command.Command {
 				Description: typeDescription("编辑%s资源", "ConfigMap"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetConfigMaps(ctx.GetNamespace(), input, 5)
+						return kubecli.GetConfigMaps(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "CONFIG_MAP_NAME",
 					Description: "编辑ConfigMap",
@@ -143,7 +143,7 @@ func NewKubeEditCommand() *command.Command {
 				Description: typeDescription("编辑%s资源", "Secret"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetSecrets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetSecrets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "SECRET_NAME",
 					Description: "编辑Secret",
@@ -163,7 +163,7 @@ func NewKubeEditCommand() *command.Command {
 					DynamicParam: &command.DynamicParam{
 						Func: func(input string) []*command.Param {
 							return kubecli.GetCrdResource(finalCrd.Extended["group"], finalCrd.Extended["version"], finalCrd.Name,
-								ctx.GetNamespace(), input, 5)
+								ctx.GetNamespace(), input, LIMIT_SUGGEST)
 						},
 						Flag:        strings.ToUpper(finalCrd.Name) + "_NAME",
 						Description: "编辑" + finalCrd.Name,

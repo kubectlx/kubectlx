@@ -17,7 +17,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "CRD"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetCrdDefinitions(input, 5)
+						return kubecli.GetCrdDefinitions(input, LIMIT_SUGGEST)
 					},
 					Flag:        "CRD_NAME",
 					Description: "查看CRD资源详情",
@@ -45,7 +45,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "Node"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetNodes(input, 5)
+						return kubecli.GetNodes(input, LIMIT_SUGGEST)
 					},
 					Flag:        "NODE_NAME",
 					Description: "查看Node资源详情",
@@ -59,7 +59,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "Pod"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetPods(ctx.GetNamespace(), input, 5)
+						return kubecli.GetPods(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "POD_NAME",
 					Description: "查看Pod资源详情",
@@ -73,7 +73,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "Service"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetServices(ctx.GetNamespace(), input, 5)
+						return kubecli.GetServices(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "SERVICE_NAME",
 					Description: "查看Service资源详情",
@@ -87,7 +87,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "Deployment"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetDeployments(ctx.GetNamespace(), input, 5)
+						return kubecli.GetDeployments(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "DEPLOYMENT_NAME",
 					Description: "查看Deployment资源详情",
@@ -101,7 +101,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "DaemonSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetDaemonSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetDaemonSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "DAEMON_SET_NAME",
 					Description: "查看DaemonSet资源详情",
@@ -115,7 +115,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "ReplicaSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetReplicaSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetReplicaSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "REPLICA_SET_NAME",
 					Description: "查看ReplicaSet资源详情",
@@ -129,7 +129,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "StatefulSet"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetStatefulSets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetStatefulSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "STATEFUL_SET_NAME",
 					Description: "查看StatefulSet资源详情",
@@ -143,7 +143,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "Job"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetJobs(ctx.GetNamespace(), input, 5)
+						return kubecli.GetJobs(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "JOB_NAME",
 					Description: "查看Job资源详情",
@@ -157,7 +157,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "CronJob"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetCronJobs(ctx.GetNamespace(), input, 5)
+						return kubecli.GetCronJobs(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "CRON_JOB_NAME",
 					Description: "查看CronJob资源详情",
@@ -171,7 +171,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "ConfigMap"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetConfigMaps(ctx.GetNamespace(), input, 5)
+						return kubecli.GetConfigMaps(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "CONFIG_MAP_NAME",
 					Description: "查看ConfigMap资源详情",
@@ -185,7 +185,7 @@ func NewKubeDescribeCommand() *command.Command {
 				Description: typeDescription("查看%s资源详情", "Secret"),
 				DynamicParam: &command.DynamicParam{
 					Func: func(input string) []*command.Param {
-						return kubecli.GetSecrets(ctx.GetNamespace(), input, 5)
+						return kubecli.GetSecrets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
 					},
 					Flag:        "SECRET_NAME",
 					Description: "查看Secret资源详情",
@@ -205,7 +205,7 @@ func NewKubeDescribeCommand() *command.Command {
 					DynamicParam: &command.DynamicParam{
 						Func: func(input string) []*command.Param {
 							return kubecli.GetCrdResource(finalCrd.Extended["group"], finalCrd.Extended["version"], finalCrd.Name,
-								ctx.GetNamespace(), input, 5)
+								ctx.GetNamespace(), input, LIMIT_SUGGEST)
 						},
 						Flag:        strings.ToUpper(finalCrd.Name) + "_NAME",
 						Description: "查看" + finalCrd.Name + "资源详情",
