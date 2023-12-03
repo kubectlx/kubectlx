@@ -45,6 +45,8 @@ func NewCompleter() *Completer {
 		Name: "Extension Command",
 		Commands: []*command.Command{
 			NewExtendedStatusCommand(),
+			NewExtendedTreeCommand(),
+			NewExtendedEventCommand(),
 		},
 	}
 	var commands []*command.Command

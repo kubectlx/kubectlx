@@ -93,3 +93,25 @@ Results:
       状态信息
 ```
 ![extended_status_cmd](docs/images/extended_status_cmd.gif)
+2. 查询资源树，不支持自定义资源
+```shell
+kubectlx >>> tree <资源类型> <资源名称>
+```
+例如：
+```shell
+kubectlx >>> tree jobs xxx
+jobs    xxx  Complete
+  |----pods     yyy    Succeeded
+```
+![tree_cmd](docs/images/extended_tree_cmd.gif)
+3. 简化事件查询命令
+```shell
+kubectlx >>> tree <资源类型> <资源名称>
+```
+例如：
+```shell
+event pods xxxx
+LAST SEEN     TYPE     REASON      OBJECT         MESSAGE
+76s          Normal    Parsed     pods/xxxx      xxxxxxxxxxx
+```
+![extended_event_cmd](docs/images/extended_event_cmd.gif)

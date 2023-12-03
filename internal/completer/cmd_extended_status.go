@@ -89,21 +89,6 @@ func NewExtendedStatusCommand() *command.Command {
 				Options: options,
 			},
 			{
-				Name:        "replicasets",
-				Description: typeDescription("查询%s资源状态", "ReplicaSet"),
-				DynamicParam: &command.DynamicParam{
-					Func: func(input string) []*command.Param {
-						return kubecli.GetReplicaSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
-					},
-					Flag:        "REPLICA_SET_NAME",
-					Description: "查询ReplicaSet状态，资源名称支持前缀模糊搜索。",
-				},
-				Run: WarpHelp(func(cmd *command.ExecCmd) {
-					execStatusCommand(cmd, nil)
-				}),
-				Options: options,
-			},
-			{
 				Name:        "statefulsets",
 				Description: typeDescription("查询%s资源状态", "StatefulSet"),
 				DynamicParam: &command.DynamicParam{

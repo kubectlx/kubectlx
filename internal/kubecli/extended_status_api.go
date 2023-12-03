@@ -70,19 +70,6 @@ func SearchK8sResourceStatus(namespace, resType, resName string) []*ResourceStat
 				})
 			}
 		}
-	case "replicasets", "replicaset":
-		if replicasets, err := factory.Apps().V1().ReplicaSets().Lister().ReplicaSets(namespace).List(labels.Everything()); err == nil {
-			for _, replicaset := range replicasets {
-				if !strings.HasPrefix(replicaset.Name, resName) {
-					continue
-				}
-				objMap, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(replicaset)
-				rss = append(rss, &ResourceStatus{
-					ResName: replicaset.Name,
-					Status:  objMap["status"],
-				})
-			}
-		}
 	case "services", "service":
 		if services, err := factory.Core().V1().Services().Lister().Services(namespace).List(labels.Everything()); err == nil {
 			for _, service := range services {
