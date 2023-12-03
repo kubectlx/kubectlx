@@ -6,18 +6,18 @@ import (
 	"github.com/cxweilai/kubectlx/internal/ctx"
 	"github.com/cxweilai/kubectlx/internal/kubecli"
 	"strings"
+	"sync"
+	"time"
 )
 
-func NewExtendedEventCommand() *command.Command {
+func NewExtendedForceDelCommand() *command.Command {
 	return &command.Command{
-		Name:        "event",
-		Description: "查询资源的事件",
+		Name:        "forcedel",
+		Description: "强制删除资源（先执行删除，如果对象没删掉，接着移除Finalizers）",
+		Commands:    nil,
 		DynamicCommands: func() []*command.Command {
 			var cmds []*command.Command
-			for _, rcmd := range kubecli.GetK8sResourceCommand("查询某个%s资源的事件") {
-				if rcmd.Name == "configmaps" || rcmd.Name == "secrets" {
-					continue
-				}
+			for _, rcmd := range kubecli.GetK8sResourceCommand("强制删除%s资源") {
 				finalCrd := *rcmd
 				cmds = append(cmds, &command.Command{
 					Name:        finalCrd.Name,
@@ -28,14 +28,14 @@ func NewExtendedEventCommand() *command.Command {
 								ctx.GetNamespace(), input, LIMIT_SUGGEST)
 						},
 						Flag:        strings.ToUpper(finalCrd.Name) + "_NAME",
-						Description: "查询某个" + finalCrd.Name + "资源的事件",
+						Description: "强制删除" + finalCrd.Name + "资源",
 					},
 					Run: WarpHelp(func(cmd *command.ExecCmd) {
-						execEventCommand(cmd)
+						execForceDeleteCommand(cmd)
 					}),
 				})
 			}
-			for _, crd := range kubecli.GetCrdCommand("查询某个%s资源的事件") {
+			for _, crd := range kubecli.GetCrdCommand("强制删除%s资源") {
 				finalCrd := *crd
 				cmds = append(cmds, &command.Command{
 					Name:        finalCrd.Name,
@@ -46,10 +46,10 @@ func NewExtendedEventCommand() *command.Command {
 								ctx.GetNamespace(), input, LIMIT_SUGGEST)
 						},
 						Flag:        strings.ToUpper(finalCrd.Name) + "_NAME",
-						Description: "查询某个" + finalCrd.Name + "资源的事件",
+						Description: "强制删除" + finalCrd.Name + "资源",
 					},
 					Run: WarpHelp(func(cmd *command.ExecCmd) {
-						execEventCommand(cmd)
+						execForceDeleteCommand(cmd)
 					}),
 				})
 			}
@@ -58,7 +58,16 @@ func NewExtendedEventCommand() *command.Command {
 	}
 }
 
-func execEventCommand(cmd *command.ExecCmd) {
-	realCmd := fmt.Sprintf("get events --field-selector involvedObject.name=%s", cmd.Param)
-	execKubectl(realCmd)
+func execForceDeleteCommand(cmd *command.ExecCmd) {
+	wait := sync.WaitGroup{}
+	wait.Add(1)
+	go func() {
+		select {
+		case <-time.After(3 * time.Second):
+			execKubectlIgnoreOutput(fmt.Sprintf("patch %s %s -p '{\"metadata\":{\"finalizers\":[]}}' --type=merge", cmd.Command.Name, cmd.Param))
+			wait.Done()
+		}
+	}()
+	execKubectl(fmt.Sprintf("delete %s %s", cmd.Command.Name, cmd.Param))
+	wait.Wait()
 }

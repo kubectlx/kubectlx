@@ -115,3 +115,9 @@ LAST SEEN     TYPE     REASON      OBJECT         MESSAGE
 76s          Normal    Parsed     pods/xxxx      xxxxxxxxxxx
 ```
 ![extended_event_cmd](docs/images/extended_event_cmd.gif)
+4. 资源有Finalizers，而可能某些Finalizers有问题，导致无法删除，通过--force强制删除也无法删除，需要先移除所有的Finalizers，才能删除，
+为了简化这个步骤，kubectlx提供一个扩展命令来实现真正的强制删除
+```shell
+kubectlx >>> forcedel <资源类型> <资源名称>
+```
+![extended_forcedel_cmd](docs/images/extended_forcedel_cmd.gif)

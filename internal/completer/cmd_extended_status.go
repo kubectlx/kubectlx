@@ -27,115 +27,30 @@ func NewExtendedStatusCommand() *command.Command {
 	return &command.Command{
 		Name:        "status",
 		Description: "查询资源状态详细信息",
-		Commands: []*command.Command{
-			{
-				Name:        "pods",
-				Description: typeDescription("查询%s资源状态", "Pod"),
-				DynamicParam: &command.DynamicParam{
-					Func: func(input string) []*command.Param {
-						return kubecli.GetPods(ctx.GetNamespace(), input, LIMIT_SUGGEST)
-					},
-					Flag:        "POD_NAME",
-					Description: "查询Pod状态，资源名称支持前缀模糊搜索。",
-				},
-				Run: WarpHelp(func(cmd *command.ExecCmd) {
-					execStatusCommand(cmd, nil)
-				}),
-				Options: options,
-			},
-			{
-				Name:        "services",
-				Description: typeDescription("查询%s资源状态", "Service"),
-				DynamicParam: &command.DynamicParam{
-					Func: func(input string) []*command.Param {
-						return kubecli.GetServices(ctx.GetNamespace(), input, LIMIT_SUGGEST)
-					},
-					Flag:        "SERVICE_NAME",
-					Description: "查询Service状态，资源名称支持前缀模糊搜索。",
-				},
-				Run: WarpHelp(func(cmd *command.ExecCmd) {
-					execStatusCommand(cmd, nil)
-				}),
-				Options: options,
-			},
-			{
-				Name:        "deployments",
-				Description: typeDescription("查询%s资源状态", "Deployment"),
-				DynamicParam: &command.DynamicParam{
-					Func: func(input string) []*command.Param {
-						return kubecli.GetDeployments(ctx.GetNamespace(), input, LIMIT_SUGGEST)
-					},
-					Flag:        "DEPLOYMENT_NAME",
-					Description: "查询Deployment状态，资源名称支持前缀模糊搜索。",
-				},
-				Run: WarpHelp(func(cmd *command.ExecCmd) {
-					execStatusCommand(cmd, nil)
-				}),
-				Options: options,
-			},
-			{
-				Name:        "daemonsets",
-				Description: typeDescription("查询%s资源状态", "DaemonSet"),
-				DynamicParam: &command.DynamicParam{
-					Func: func(input string) []*command.Param {
-						return kubecli.GetDaemonSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
-					},
-					Flag:        "DAEMON_SET_NAME",
-					Description: "查询DaemonSet状态，资源名称支持前缀模糊搜索。",
-				},
-				Run: WarpHelp(func(cmd *command.ExecCmd) {
-					execStatusCommand(cmd, nil)
-				}),
-				Options: options,
-			},
-			{
-				Name:        "statefulsets",
-				Description: typeDescription("查询%s资源状态", "StatefulSet"),
-				DynamicParam: &command.DynamicParam{
-					Func: func(input string) []*command.Param {
-						return kubecli.GetStatefulSets(ctx.GetNamespace(), input, LIMIT_SUGGEST)
-					},
-					Flag:        "STATEFUL_SET_NAME",
-					Description: "查询StatefulSet状态，资源名称支持前缀模糊搜索。",
-				},
-				Run: WarpHelp(func(cmd *command.ExecCmd) {
-					execStatusCommand(cmd, nil)
-				}),
-				Options: options,
-			},
-			{
-				Name:        "jobs",
-				Description: typeDescription("查询%s资源状态", "Job"),
-				DynamicParam: &command.DynamicParam{
-					Func: func(input string) []*command.Param {
-						return kubecli.GetJobs(ctx.GetNamespace(), input, LIMIT_SUGGEST)
-					},
-					Flag:        "JOB_NAME",
-					Description: "查询Job状态，资源名称支持前缀模糊搜索。",
-				},
-				Run: WarpHelp(func(cmd *command.ExecCmd) {
-					execStatusCommand(cmd, nil)
-				}),
-				Options: options,
-			},
-			{
-				Name:        "cronjobs",
-				Description: typeDescription("查询%s资源状态", "CronJob"),
-				DynamicParam: &command.DynamicParam{
-					Func: func(input string) []*command.Param {
-						return kubecli.GetCronJobs(ctx.GetNamespace(), input, LIMIT_SUGGEST)
-					},
-					Flag:        "CRON_JOB_NAME",
-					Description: "查询CronJob状态，资源名称支持前缀模糊搜索。",
-				},
-				Run: WarpHelp(func(cmd *command.ExecCmd) {
-					execStatusCommand(cmd, nil)
-				}),
-				Options: options,
-			},
-		},
 		DynamicCommands: func() []*command.Command {
 			var cmds []*command.Command
+			for _, rcmd := range kubecli.GetK8sResourceCommand("查询%s资源状态") {
+				if rcmd.Name == "configmaps" || rcmd.Name == "secrets" {
+					continue
+				}
+				finalCrd := *rcmd
+				cmds = append(cmds, &command.Command{
+					Name:        finalCrd.Name,
+					Description: finalCrd.Description,
+					DynamicParam: &command.DynamicParam{
+						Func: func(input string) []*command.Param {
+							return kubecli.GetK8sResource(finalCrd.Extended["group"], finalCrd.Extended["version"], finalCrd.Name,
+								ctx.GetNamespace(), input, LIMIT_SUGGEST)
+						},
+						Flag:        strings.ToUpper(finalCrd.Name) + "_NAME",
+						Description: "查询" + finalCrd.Name + "状态，资源名称支持前缀模糊搜索。",
+					},
+					Run: WarpHelp(func(cmd *command.ExecCmd) {
+						execStatusCommand(cmd, &finalCrd)
+					}),
+					Options: options,
+				})
+			}
 			for _, crd := range kubecli.GetCrdCommand("查询%s资源状态") {
 				finalCrd := *crd
 				cmds = append(cmds, &command.Command{
@@ -162,10 +77,10 @@ func NewExtendedStatusCommand() *command.Command {
 
 func execStatusCommand(cmd *command.ExecCmd, crd *command.Param) {
 	var result []*kubecli.ResourceStatus
-	if crd != nil {
+	if !kubecli.IsK8sResource(crd.Extended["group"], crd.Name) {
 		result = kubecli.SearchCrdResourceStatus(ctx.GetNamespace(), crd.Extended["group"], crd.Extended["version"], crd.Name, cmd.Param)
 	} else {
-		result = kubecli.SearchK8sResourceStatus(ctx.GetNamespace(), cmd.Command.Name, cmd.Param)
+		result = kubecli.SearchK8sResourceStatus(ctx.GetNamespace(), crd.Extended["group"], crd.Extended["version"], cmd.Command.Name, cmd.Param)
 	}
 	// 只取conditions字段
 	if _, ok := cmd.GetOption("--c"); ok {
