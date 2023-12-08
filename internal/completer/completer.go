@@ -48,6 +48,7 @@ func NewCompleter() *Completer {
 			NewExtendedTreeCommand(),
 			NewExtendedEventCommand(),
 			NewExtendedForceDelCommand(),
+			NewExtendedSecretCommand(),
 		},
 	}
 	var commands []*command.Command

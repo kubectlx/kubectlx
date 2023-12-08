@@ -121,3 +121,17 @@ LAST SEEN     TYPE     REASON      OBJECT         MESSAGE
 kubectlx >>> forcedel <资源类型> <资源名称>
 ```
 ![extended_forcedel_cmd](docs/images/extended_forcedel_cmd.gif)
+5. 明文显示Secret资源
+```shell
+secret show secret资源名称
+```
+支持参数：
+* -o：指定输出格式，支持json|yaml，默认为yaml 
+* --show-data=true：只输出data
+例如：
+```shell
+kubectlx >>> secret show variable-xxx --show-data=true
+TF_VAR_alb_name: chenyuntest
+TF_VAR_is_internal: "true"
+.......
+```
