@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"github.com/c-bata/go-prompt"
-	"github.com/cxweilai/kubectlx/internal/completer"
-	"github.com/cxweilai/kubectlx/internal/ctx"
-	"github.com/cxweilai/kubectlx/internal/option"
+	"github.com/kubectlx/kubectlx/internal/completer"
+	"github.com/kubectlx/kubectlx/internal/ctx"
+	"github.com/kubectlx/kubectlx/internal/option"
 )
 
 func main() {

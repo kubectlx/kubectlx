@@ -2,7 +2,7 @@ package completer
 
 import (
 	"fmt"
-	"github.com/cxweilai/kubectlx/internal/command"
+	"github.com/kubectlx/kubectlx/internal/command"
 	"os"
 	"os/exec"
 	"runtime"

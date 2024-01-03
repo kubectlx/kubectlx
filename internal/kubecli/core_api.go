@@ -2,7 +2,7 @@ package kubecli
 
 import (
 	"fmt"
-	"github.com/cxweilai/kubectlx/internal/command"
+	"github.com/kubectlx/kubectlx/internal/command"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"

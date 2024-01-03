@@ -3,9 +3,9 @@ package completer
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/cxweilai/kubectlx/internal/command"
-	"github.com/cxweilai/kubectlx/internal/ctx"
-	"github.com/cxweilai/kubectlx/internal/kubecli"
+	"github.com/kubectlx/kubectlx/internal/command"
+	"github.com/kubectlx/kubectlx/internal/ctx"
+	"github.com/kubectlx/kubectlx/internal/kubecli"
 	"sigs.k8s.io/yaml"
 )
 

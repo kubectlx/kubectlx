@@ -2,8 +2,8 @@ package ctx
 
 import (
 	"fmt"
-	"github.com/cxweilai/kubectlx/internal/kubecli"
-	"github.com/cxweilai/kubectlx/internal/option"
+	"github.com/kubectlx/kubectlx/internal/kubecli"
+	"github.com/kubectlx/kubectlx/internal/option"
 	"log"
 	"os"
 	"runtime"

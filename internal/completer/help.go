@@ -1,6 +1,6 @@
 package completer
 
-import "github.com/cxweilai/kubectlx/internal/command"
+import "github.com/kubectlx/kubectlx/internal/command"
 
 func WarpHelp(f func(cmd *command.ExecCmd)) func(cmd *command.ExecCmd) {
 	return func(cmd *command.ExecCmd) {

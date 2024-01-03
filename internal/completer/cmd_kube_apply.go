@@ -1,6 +1,6 @@
 package completer
 
-import "github.com/cxweilai/kubectlx/internal/command"
+import "github.com/kubectlx/kubectlx/internal/command"
 
 func NewKubeApplyCommand() *command.Command {
 	return &command.Command{
