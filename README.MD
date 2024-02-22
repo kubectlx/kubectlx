@@ -1,7 +1,10 @@
-# kubectlx
+# kubectlx 
+
+![logo](docs/images/logo2.png)
 
 kubectlx是一款基于go-prompt库开发的k8s命令行工具，目的是简化kubectl工具的一些常用命令的使用，
 并提供命令输入提示、自动补全。
+
 ![kube_cmd](docs/images/kube_cmd.gif)
 
 ## 支持多k8s集群
