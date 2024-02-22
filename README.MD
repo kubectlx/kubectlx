@@ -2,10 +2,16 @@
 
 ![logo](docs/images/logo2.png)
 
-kubectlx是一款基于go-prompt库开发的k8s命令行工具，目的是简化kubectl工具的一些常用命令的使用，
-并提供命令输入提示、自动补全。
+[kubectlx](https://github.com/kubectlx/kubectlx)是一款基于go-prompt库开发的k8s命令行工具，目的是简化kubectl工具的一些常用命令的使用， 并提供命令输入提示、自动补全。
 
-![kube_cmd](docs/images/kube_cmd.gif)
+![kubectlx](docs/images/kubectlx.gif)
+
+主要功能特性：
+- 多k8s集群切换，便于管理多个k8s集群
+- namespace切换，减少kubectl每条命令都加'-n namesapce'
+- 命令输入提示和自动补全，命令的每个部分都支持输入提示和TAG键补全
+- 输入提示和自动补全支持自定义的CRD资源
+- 提供额外的扩展命令，简化一些场景需要多条命令组合才能完成的情况
 
 ## 支持多k8s集群
 1. 可通过启动参数指定会话连接的k8s集群
